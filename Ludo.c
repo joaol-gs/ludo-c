@@ -10,20 +10,25 @@
 
 #endif
 
+#define limite = 39
+
 typedef struct peao{
     int pos;
-    int posfin;
-    int jogador;
-    int ID;
+    int posTab[2];
+    char simb;
+    char direc;
+    int sentido;
 }Peao;
 
 void mostrarTabuleiro();
 void mostraMenu();
-void definePeao(Peao peao, int ID,int pos, int jogador);
-void moverPeao(Peao peao, int quantCasas);
-void iniciar(int numJogadores);
+void definePeao(Peao *peao, int pos, int posTab[2], char simb, char direct);
+void moverPeao(Peao *peao, int quantCasas);
+void iniciar();
+void setJogadores();
 int lancarDado();
 void limparTela();
+
 
 char tabuleiro[11][11] = {
     ' ',' ',' ',' ','o','o','o',' ',' ',' ',' ',
@@ -38,27 +43,26 @@ char tabuleiro[11][11] = {
     ' ',' ',' ',' ','o','#','o',' ',' ',' ',' ',
     ' ',' ',' ',' ','o','o','o',' ',' ',' ',' '
 };
-char regiao[11][11] = {
-    ' ',' ',' ',' ','2','2','2',' ',' ',' ',' ',
-    ' ',' ',' ',' ','2','2','2',' ',' ',' ',' ',
-    ' ',' ',' ',' ','2','2','2',' ',' ',' ',' ',
-    ' ',' ',' ',' ','2','2','2',' ',' ',' ',' ',
-    '3','3','3','3','o','#','o','4','4','4','4',
-    '3','3','3','3','#',' ','#','4','4','4','4',
-    '3','3','3','3','o','#','o','4','4','4','4',
-    ' ',' ',' ',' ','1','1','1',' ',' ',' ',' ',
-    ' ',' ',' ',' ','1','1','1',' ',' ',' ',' ',
-    ' ',' ',' ',' ','1','1','1',' ',' ',' ',' ',
-    ' ',' ',' ',' ','1','1','1',' ',' ',' ',' '
-};
 
 Peao peaoJ1[4];
 Peao peaoJ2[4];
 Peao peaoJ3[4];
 Peao peaoJ4[4];
+int quantJogadores;
 
 int main(){
-    mostraMenu(0);
+    int cont = 0;
+    for (int i = 0; i < 11; i++){
+        for (int j = 0; j < 11; j++){
+            if(tabuleiro[i][j] == 'o'){
+                cont++;
+            }
+        }
+    }
+
+    printf("Total de casas: %d \n", cont);
+    
+    //mostraMenu(0);
     return 0;
 }
 
@@ -83,7 +87,6 @@ void mostrarTabuleiro(){
 
 void mostraMenu(){
     int opc;
-    int quantJogadores;
     printf("\n\n\n");
     printf(".##.......##.....##.########...#######.\n");
     printf(".##.......##.....##.##.....##.##.....##\n");
@@ -105,7 +108,7 @@ void mostraMenu(){
         printf("Quantidade de jogadores: ");
         scanf("%d", &quantJogadores);
         limparTela();
-        iniciar(quantJogadores);
+        iniciar();
         break;
     default:
         printf("Opção Inválida\n");
@@ -113,20 +116,57 @@ void mostraMenu(){
     }
 }
 
-void iniciar(int numJogadores){
-    switch (numJogadores){
+void iniciar(){
+    setJogadores();
+    lancarDado();    
+}
+
+void setJogadores(){
+    int coord[2];
+    switch (quantJogadores){
     case 2:
-        //Defini posição inicial dos peões do jogador 1
+        //Define posição inicial dos peões do jogador 1
         tabuleiro[8][1] = '1';
+        coord[1] = 8;
+        coord[2] = 1;
+        definePeao(&peaoJ1[0], 0, coord, '1', '-');
+
         tabuleiro[8][2] = '1';
+        coord[1] = 8;
+        coord[2] = 2;
+        definePeao(&peaoJ1[1], 0, coord, '1', '-');
+
         tabuleiro[9][1] = '1';
+        coord[1] = 9;
+        coord[2] = 1;
+        definePeao(&peaoJ1[2], 0, coord, '1', '-');
+
         tabuleiro[9][2] = '1';
+        coord[1] = 9;
+        coord[2] = 2;
+        definePeao(&peaoJ1[3], 0, coord, '1', '-');
 
         //Define posição inicial dos peões do jogador 2
+
         tabuleiro[1][8] = '2';
+        coord[1] = 1;
+        coord[2] = 8;
+        definePeao(&peaoJ1[0], 0, coord, '2', '-');
+
         tabuleiro[1][9] = '2';
+        coord[1] = 1;
+        coord[2] = 9;
+        definePeao(&peaoJ1[1], 0, coord, '2', '-');
+
         tabuleiro[2][8] = '2';
+        coord[1] = 2;
+        coord[2] = 8;
+        definePeao(&peaoJ1[2], 0, coord, '2', '-');
+
         tabuleiro[2][9] = '2';
+        coord[1] = 2;
+        coord[2] = 9;
+        definePeao(&peaoJ1[3], 0, coord, '2', '-');
         
         break;
     case 3:
@@ -177,19 +217,71 @@ void iniciar(int numJogadores){
         printf("Não é possível jogar com essa quantidade de jogadores :( \n");
         break;
     }
-    mostrarTabuleiro();
 }
-void moverPeao(Peao peao, int quantCasas){
-    peao.pos += quantCasas;
+
+void moverPeao(Peao *peao, int quantCasas){
+    for (int i = 0; i < quantCasas; i++){
+
+        peao->pos++;
+    }
+    
+    
 }
-void definePeao(Peao peao, int ID, int pos, int jogador){
-    peao.ID = ID;
-    peao.jogador = jogador;
-    peao.pos = pos;
-    peao.posfin = 52;
+
+void hvDirect(Peao *peao){
+    if (peao->posTab[0] == 0 && peao->posTab[1] == 4){
+        peao->direc = 'h';
+        peao->sentido = 1;
+    }else if(peao->posTab[0] == 0 && peao->posTab[1] == 6){
+        peao->direc = 'v';
+        peao->sentido = 1;
+    }else if(peao->posTab[0] == 4 && peao->posTab[1] == 6){
+        peao->direc = 'h';
+        peao->sentido = 1;
+    }else if(peao->posTab[0] == 4 && peao->posTab[1] == 10){
+        peao->direc = 'v';
+        peao->sentido = 1;
+    }else if(peao->posTab[0] == 6 && peao->posTab[1] == 10){
+        peao->direc = 'h';
+        peao->sentido = -1;
+    }else if(peao->posTab[0] == 6 && peao->posTab[1] == 6){
+        peao->direc = 'v';
+        peao->sentido = 1;
+    }else if(peao->posTab[0] == 10 && peao->posTab[1] == 6){
+        peao->direc = 'h';
+        peao->sentido = -1;
+    }else if(peao->posTab[0] == 10 && peao->posTab[1] == 4){
+        peao->direc = 'v';
+        peao->sentido = -1;
+    }else if(peao->posTab[0] == 6 && peao->posTab[1] == 4){
+        peao->direc = 'h';
+        peao->sentido = -1;
+    }else if(peao->posTab[0] == 6 && peao->posTab[1] == 0){
+        peao->direc = 'v';
+        peao->sentido = -1;
+    }else if(peao->posTab[0] == 4 && peao->posTab[1] == 0){
+        peao->direc = 'h';
+        peao->sentido = 1;
+    }else if(peao->posTab[0] == 4 && peao->posTab[1] == 0){
+        peao->direc = 'v';
+        peao->sentido = -1;
+    }else{
+        //A direção se mantém
+    }
+}
+
+void definePeao(Peao *peao, int pos, int posTab[2], char simb, char direct){
+    peao->pos = pos;
+    peao->posTab[1] = posTab[1];
+    peao->posTab[2] = posTab[2];
+    peao->simb = simb;
+    peao->direc = direct;
 }
 
 int lancarDado(){
+    char c;
+    printf("Pressione enter para rolar o dado");
+    scanf("%c", &c);
     int num = rand() % 7;
     return num;
 }
