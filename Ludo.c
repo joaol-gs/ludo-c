@@ -18,11 +18,12 @@ typedef struct peao{
     char simb;
     char direc;
     int sentido;
+    int ID;
 }Peao;
 
 void mostrarTabuleiro();
 void mostraMenu();
-void definePeao(Peao *peao, int pos, int posTab[2], char simb, char direct);
+void definePeao(Peao *peao, int pos, int posTab[2], char simb, char direct, int ID);
 void moverPeao(Peao *peao, int quantCasas);
 void iniciar();
 void setJogadores();
@@ -31,7 +32,8 @@ void limparTela();
 int jogadorIniciado(Peao peao[]);
 void tirardeCasa(Peao *peao);
 int estaEmCasa(Peao peao);
-void verificaQualPeao(Peao *peao);
+void hvDirect(Peao *peao);
+int verificaQualPeao(Peao *peao);
 
 char tabuleiro[11][11] = {
     ' ',' ',' ',' ','o','o','o',' ',' ',' ',' ',
@@ -120,6 +122,7 @@ void iniciar(){
         mostrarTabuleiro();
         int dado = lancarDado();
         printf("Resultado: %d \n", dado);
+        int peaoMover;
         switch (turno){
             case 1:
                 if(jogadorIniciado(peaoJ1) == 4){
@@ -135,10 +138,12 @@ void iniciar(){
                         if (escolha == 's'){
                             tirardeCasa(peaoJ1);
                         }else{
-                            verificaQualPeao(peaoJ1);
+                            peaoMover = verificaQualPeao(peaoJ1);
+                            moverPeao(&peaoJ1[0], dado);
                         }
                     }else{
                         verificaQualPeao(peaoJ1);
+                        moverPeao(&peaoJ1[0], dado);
                     }
                 }
                 break;
@@ -180,44 +185,44 @@ void setJogadores(){
         tabuleiro[8][1] = '1';
         coord[0] = 8;
         coord[1] = 1;
-        definePeao(&peaoJ1[0], 0, coord, '1', '-');
+        definePeao(&peaoJ1[0], 0, coord, '1', '-', 0);
 
         tabuleiro[8][2] = '1';
         coord[0] = 8;
         coord[1] = 2;
-        definePeao(&peaoJ1[1], 0, coord, '1', '-');
+        definePeao(&peaoJ1[1], 0, coord, '1', '-', 1);
 
         tabuleiro[9][1] = '1';
         coord[0] = 9;
         coord[1] = 1;
-        definePeao(&peaoJ1[2], 0, coord, '1', '-');
+        definePeao(&peaoJ1[2], 0, coord, '1', '-', 2);
 
         tabuleiro[9][2] = '1';
         coord[0] = 9;
         coord[1] = 2;
-        definePeao(&peaoJ1[3], 0, coord, '1', '-');
+        definePeao(&peaoJ1[3], 0, coord, '1', '-', 3);
 
         //Define posição inicial dos peões do jogador 2
 
         tabuleiro[1][8] = '2';
         coord[0] = 1;
         coord[1] = 8;
-        definePeao(&peaoJ2[0], 0, coord, '2', '-');
+        definePeao(&peaoJ2[0], 0, coord, '2', '-', 0);
 
         tabuleiro[1][9] = '2';
         coord[0] = 1;
         coord[1] = 9;
-        definePeao(&peaoJ2[1], 0, coord, '2', '-');
+        definePeao(&peaoJ2[1], 0, coord, '2', '-', 1);
 
         tabuleiro[2][8] = '2';
         coord[0] = 2;
         coord[1] = 8;
-        definePeao(&peaoJ2[2], 0, coord, '2', '-');
+        definePeao(&peaoJ2[2], 0, coord, '2', '-', 2);
 
         tabuleiro[2][9] = '2';
         coord[0] = 2;
         coord[1] = 9;
-        definePeao(&peaoJ2[3], 0, coord, '2', '-');
+        definePeao(&peaoJ2[3], 0, coord, '2', '-', 3);
         
         break;
     case 3:
@@ -272,23 +277,37 @@ void setJogadores(){
 
 void moverPeao(Peao *peao, int quantCasas){
     for (int i = 0; i < quantCasas; i++){
-        if(peao->direc == 'v'){
+        hvDirect(peao);
+        tabuleiro[peao->posTab[0]][peao->posTab[1]] = 'o';
+        printf("\nPosição: %d %d\n", peao->posTab[0], peao->posTab[1]);
+        if(peao->pos == 0){
+            tabuleiro[peao->posTab[0]][peao->posTab[1]] = ' ';
+            if(peao->simb == '1'){
+                tabuleiro[9][4] = peao->simb;
+                peao->posTab[0] = 9;
+                peao->posTab[1] = 4;
+            }else if(peao->simb == '2'){
+                tabuleiro[1][6] = peao->simb;
+                peao->posTab[0] = 1;
+                peao->posTab[1] = 6;
+            }else if(peao->simb == '3'){
+                tabuleiro[6][9] = peao->simb;
+                peao->posTab[0] = 6;
+                peao->posTab[1] = 9;
+            }else if(peao->simb == '4'){
+                tabuleiro[9][4] = peao->simb;
+                peao->posTab[0] = 9;
+                peao->posTab[1] = 4;
+            }
+        }else if(peao->direc == 'v'){
             peao->posTab[1] += peao->sentido;
         }else if(peao->direc == 'h'){
             peao->posTab[0] += peao->sentido;
         }else{
-            tabuleiro[peao->posTab[0]][peao->posTab[1]] = ' ';
-            if(peao->simb == '1'){
-                tabuleiro[9][4] = peao->simb;
-            }else if(peao->simb == '2'){
-                tabuleiro[1][6] = peao->simb;
-            }else if(peao->simb == '3'){
-                tabuleiro[6][9] = peao->simb;
-            }else if(peao->simb == '4'){
-                tabuleiro[9][4] = peao->simb;
-            }
+    
         }
         peao->pos++;
+        tabuleiro[peao->posTab[0]][peao->posTab[1]] = peao->simb;
     }    
 }
 
@@ -334,12 +353,13 @@ void hvDirect(Peao *peao){
     }
 }
 
-void definePeao(Peao *peao, int pos, int posTab[2], char simb, char direct){
+void definePeao(Peao *peao, int pos, int posTab[2], char simb, char direct, int ID){
     peao->pos = pos;
     peao->posTab[0] = posTab[0];
     peao->posTab[1] = posTab[1];
     peao->simb = simb;
     peao->direc = direct;
+    peao->ID = ID;
 }
 
 int lancarDado(){
@@ -362,6 +382,26 @@ int jogadorIniciado(Peao peao[4]){
 void tirardeCasa(Peao *peao){
     for(int i = 0; i < 4; i++){
         if(peao[i].pos == 0){
+            switch (peao->simb){
+            case '1':
+                peao->sentido = -1;
+                peao->direc = 'v';
+                break;
+            case '2':
+                peao->sentido = 1;
+                peao->direc = 'v';
+                break;
+            case '3':
+                peao->sentido = 1;
+                peao->direc = 'h';
+                break;
+            case '4':
+                peao->sentido = -1;
+                peao->direc = 'h';
+                break;
+            default:
+                break;
+            }
             moverPeao(&peao[i], 1);
             break;
         }
@@ -376,12 +416,15 @@ int estaEmCasa(Peao peao){
     }
 }
 
-void verificaQualPeao(Peao *peao){
+int verificaQualPeao(Peao *peao){
+    int escolha;
     printf("Qual peão vc deseja mover?\n");
     for (int i = 0; i < 4; i++){
         if(!estaEmCasa(peao[i])){
-            printf("Peão na posição %d %d\n", peao[i].pos, estaEmCasa(peao[i]));
+            printf("%d - Peão na posição %d %d\n", peao[i].ID, peao[i].pos, estaEmCasa(peao[i]));
         }
     }
     printf("Sua escolha: ");
+    scanf("%d", &escolha);
+    return escolha;
 }
