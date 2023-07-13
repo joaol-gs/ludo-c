@@ -88,7 +88,6 @@ int main(){
 }
 
 void limparTela(){    
-    if(playing == 1){
     #ifdef __linux__
         system("clear");
     #elif __WIN32
@@ -96,7 +95,6 @@ void limparTela(){
     #else
 
     #endif
-    }
 }
 
 void mostrarTabuleiro(){ 
@@ -118,8 +116,8 @@ void mostrarTabuleiro(){
         for(int j = 0; j < 11; j++){
             tabuleiro[i][j] = referencia[i][j];
         }
-        printf("\n");
     }
+    printf("\n");
 }
 
 void mostraMenu(){
@@ -162,7 +160,7 @@ void iniciar(){
     int memDado[3];
     int cont = 0;
     while (playing){
-        printf("Turno do Jogador %d \n", turno);
+        printf("Turno do Jogador %d \n\n", turno);
         mostrarTabuleiro();
         int dado = lancarDado();
         memDado[cont] = dado;
@@ -178,7 +176,7 @@ void iniciar(){
             default:
                 break;
         }
-        printf("Pressione Enter para continuar...\n");
+       // printf("Pressione Enter para continuar...\n");
         getchar();
         limparTela();
         if(turno == quantJogadores){
@@ -256,11 +254,11 @@ void moverPeao(Peao *peoes, int quantCasas, int indice){
         }else if(peoes[indice].direc == 'h'){
             peoes[indice].posTaby += peoes[indice].sentido;
         }else{
-            printf("Posição indefinida");
+            printf("Posição indefinida\n");
         }
         //soma na posição interna do vetor
         peoes[indice].pos++;
-        printf("\nPosição: %d %d %c\n", peoes[indice].posTabx, peoes[indice].posTaby, peoes[indice].simb);
+       // printf("\nPosição: %d %d %c\n", peoes[indice].posTabx, peoes[indice].posTaby, peoes[indice].simb);
         
     }    
 }
@@ -313,6 +311,28 @@ void hvDirect(Peao *peao){
 
         }
     }
+    switch (peao->simb){
+    case '1':
+        for (int i = 0; i < 4; i++){
+            if(peao->posTabx == peaoJ2[i].posTabx && peao->posTaby == peaoJ2[i].posTaby){
+                definePeao(&peaoJ2[i], 0, 1, 8, '2', 'v', peaoJ2[i].ID, 1);
+                printf("O jogador 2 voltou pra casa \n");
+            }
+        }        
+        break;
+    case '2':
+        for (int i = 0; i < 4; i++){
+            if(peao->posTabx == peaoJ1[i].posTabx && peao->posTaby == peaoJ1[i].posTaby){
+                definePeao(&peaoJ1[0], 0, 8, 1, '1', 'v', peaoJ1[i].ID, -1);
+                printf("O jogador 1 Voltou pra casa \n");
+            }
+        }  
+        break;
+    
+    default:
+        break;
+    }
+
 }
 
 void definePeao(Peao *peao, int pos, int coordx, int coordy, char simb, char direct, int ID, int sentido){
@@ -366,6 +386,7 @@ void tirardeCasa(Peao *peoes){
                 break;
             }*/
             moverPeao(peoes, 1, i);
+            printf("O jogador %c saiu de casa \n", peoes[i].simb);
             return;
         }
     }
@@ -384,8 +405,10 @@ int verificaQualPeao(Peao *peao){
     printf("Qual peão vc deseja mover?\n");
     for (int i = 0; i < 4; i++){
         if(!estaEmCasa(peao[i])){
-            printf("%d - Peão na posição %d, direção: %c, sentido: %d, posição no tabuleiro: [%d, %d]\n", 
-            peao[i].ID, peao[i].pos, peao[i].direc, peao[i].sentido, peao[i].posTabx, peao[i].posTaby);
+           /* printf("%d - Peão na posição %d, direção: %c, sentido: %d, posição no tabuleiro: [%d, %d]\n", 
+            peao[i].ID, peao[i].pos, peao[i].direc, peao[i].sentido, peao[i].posTabx, peao[i].posTaby);*/
+            printf("%d - Peão na posição: [%d, %d]\n", 
+            peao[i].ID, peao[i].posTabx, peao[i].posTaby);
         }
     }
     printf("Sua escolha: ");
@@ -394,7 +417,7 @@ int verificaQualPeao(Peao *peao){
 }
 
 void Jogar(int dado, Peao *peoes){
-    printf("Peão simbolo: %c\n", peoes[0].simb);
+    //printf("Peão simbolo: %c\n", peoes[0].simb);
     int indice;
     if(jogadorIniciado(peoes) == 4){
         if(dado == 6){
@@ -425,7 +448,7 @@ void verificaVencedor(){
         if(peaoJ1[i].posTabx == 5 && peaoJ1[i].posTaby == 5){
             limparTela();
             mostrarTabuleiro();
-            printf("Jogador %c é o vencedor", peaoJ1[i].simb);
+            printf("Jogador %c é o vencedor\n", peaoJ1[i].simb);
             playing = 0;
             return;
         }
